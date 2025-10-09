@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
 
+// a tiny helper for equality + hashing so Set<TilePos> works
+class TilePos {
+  final int row;
+  final int col;
+  TilePos(this.row, this.col);
+
+  @override
+  bool operator ==(Object other) =>
+      other is TilePos && other.row == row && other.col == col;
+
+  @override
+  int get hashCode => row.hashCode ^ col.hashCode;
+}
+
+
 class LetterTile extends StatelessWidget {
   final String letter;
   final bool isSelected;

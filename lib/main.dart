@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:word_hunt/screens/game_screen.dart';
-import 'package:word_hunt/screens/game_screen_new.dart';
 import 'package:word_hunt/services/word_list_service.dart';
 import 'package:word_hunt/screens/test_screen.dart';
 

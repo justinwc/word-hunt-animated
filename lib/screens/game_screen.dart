@@ -10,10 +10,8 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late BoardState boardState;
+  late GameState gameState;
   final GlobalKey _gridKey = GlobalKey();
-  final List<TilePos> _selectedList = [];
-  final Set<TilePos> _selectedSet = {};
 
   static const double _gridPadding = 20.0;
   static const double _crossAxisSpacing = 10.0;
@@ -22,32 +20,72 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    boardState = BoardState();
+    gameState = GameState();
+    gameState.addListener(_onGameStateChanged);
+    gameState.startTimer();
   }
 
-  // void _onTileDown(int row, int col) {
-  //   final pos = TilePos(row, col);
-  //   if (!_selectedSet.contains(pos)) {
-  //     setState(() {
-  //       _selectedList.add(pos);
-  //       _selectedSet.add(pos);
-  //     });
-  //   }
-  // }
+  @override
+  void dispose() {
+    gameState.stopTimer();
+    gameState.removeListener(_onGameStateChanged);
+    gameState.dispose();
+    super.dispose();
+  }
+
+  void _onGameStateChanged() {
+    setState(() {});
+    
+    // Show game over dialog when time is up
+    if (gameState.isGameOver) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showGameOverDialog();
+      });
+    }
+  }
+
+  void _showGameOverDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Time\'s Up!'),
+        content: Text('Your final score: ${gameState.score}'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              //gameState.restartGame();
+            },
+            child: const Text('Play Again'),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _onTileDown(int row, int col) {
+    if (!gameState.isGameOver) {
+      gameState.selectTile(TilePos(row, col));
+    }
   }
 
   void _handlePanStart(DragStartDetails details) {
-    _processPointer(details.globalPosition);
+    if (!gameState.isGameOver) {
+      _processPointer(details.globalPosition);
+    }
   }
 
   void _handlePanUpdate(DragUpdateDetails details) {
-    _processPointer(details.globalPosition);
+    if (!gameState.isGameOver) {
+      _processPointer(details.globalPosition);
+    }
   }
 
   void _handlePanEnd(DragEndDetails details) {
-    _endSelection();
+    if (!gameState.isGameOver) {
+      gameState.endSelection();
+    }
   }
 
   void _processPointer(Offset globalPosition) {
@@ -58,8 +96,8 @@ class _GameScreenState extends State<GameScreen> {
 
     final local = box.globalToLocal(globalPosition);
 
-    final rows = boardState.board.length;
-    final cols = boardState.board[0].length;
+    final rows = gameState.board.length;
+    final cols = gameState.board[0].length;
 
     // Calculate the content area (exclude padding)
     final contentWidth = box.size.width - 2 * _gridPadding;
@@ -86,7 +124,7 @@ class _GameScreenState extends State<GameScreen> {
 
     // If pointer is inside a gap horizontally or vertically, ignore
     if (withinPeriodX > tileWidth || withinPeriodY > tileHeight) {
-      return; // inside the spacing gap → don't select a tile
+      return; 
     }
 
     final col = (dx / periodX).floor();
@@ -94,41 +132,13 @@ class _GameScreenState extends State<GameScreen> {
 
     if (row < 0 || row >= rows || col < 0 || col >= cols) return;
 
-    _updateSelectionAt(row, col);
-  }
-
-  // Try to add a tile to the current selection while dragging
-  void _updateSelectionAt(int row, int col) {
-    final pos = TilePos(row, col);
-
-    // If already selected, ignore
-    if (_selectedSet.contains(pos)) return;
-
-    setState(() {
-      _selectedList.add(pos);
-      _selectedSet.add(pos);
-    });
-  }
-
-  void _endSelection() {
-    if (_selectedList.isNotEmpty) {
-      final word = _selectedList.map((p) => boardState.board[p.row][p.col]).join();
-      debugPrint('Formed word: $word');
-
-      // TODO: validate word against your WordListService and update score if valid
-    }
-
-    // Always clear selection after finishing (whether it was a single tap or drag)
-    setState(() {
-      _selectedList.clear();
-      _selectedSet.clear();
-    });
+    gameState.selectTile(TilePos(row, col));
   }
 
   @override
   Widget build(BuildContext context) {
-    final rows = boardState.board.length;
-    final cols = boardState.board[0].length;
+    final rows = gameState.board.length;
+    final cols = gameState.board[0].length;
 
     return Scaffold(
       backgroundColor: const Color(0xFFA3B18A),
@@ -141,6 +151,32 @@ class _GameScreenState extends State<GameScreen> {
               'Word Hunt',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+
+            const SizedBox(height: 24),
+
+            Text(
+              'Time Left: ${gameState.formattedTime}',
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              'Score: ${gameState.score}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              gameState.getCurrentWord(),
+              style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+            ),
+
+            const SizedBox(height: 16),
 
             GestureDetector(
               onPanStart: _handlePanStart,
@@ -161,8 +197,8 @@ class _GameScreenState extends State<GameScreen> {
                 itemBuilder: (context, index) {
                   final row = index ~/ cols;
                   final col = index % cols;
-                  final letter = boardState.board[row][col];
-                  final isSelected = _selectedSet.contains(TilePos(row, col));
+                  final letter = gameState.board[row][col];
+                  final isSelected = gameState.isTileSelected(TilePos(row, col));
 
                   return LetterTile(
                     letter: letter,
@@ -171,9 +207,9 @@ class _GameScreenState extends State<GameScreen> {
                     isSelected: isSelected,
                     onTapDown: (int row, int col) => _onTileDown(row, col),
                     onTap: () {
-                      // Handle tile tap
-                      print('Tapped letter: $letter at ($row, $col)');
-                      _endSelection();
+                      if (!gameState.isGameOver) {
+                        gameState.endSelection();
+                      }
                     },
                   );
                 },

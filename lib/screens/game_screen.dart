@@ -131,126 +131,138 @@ class _GameScreenState extends State<GameScreen> {
     final cols = gameState.board[0].length;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFA3B18A),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Word Hunt',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-
-            const SizedBox(height: 24),
-
-            Text(
-              'Time Left: ${gameState.formattedTime}',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('lib/assets/background.png'),
+            fit: BoxFit.cover,
+            scale: 0.8,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Word Hunt',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 24),
 
-            Text(
-              'Score: ${gameState.score}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+              Text(
+                'Time Left: ${gameState.formattedTime}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 8),
 
-            SizedBox(
-              height: 48,
-              child: gameState.selectedTiles.isNotEmpty
-                  ? Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: switch (gameState.getCurrentWordState()) {
-                          WordState.valid => Colors.green[300],
-                          WordState.alreadyScored => Colors.orange[300],
-                          WordState.invalid => Colors.white,
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: const Offset(0, 2),
-                            blurRadius: 4,
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        gameState.getCurrentWord().toUpperCase(),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+              Text(
+                'Score: ${gameState.score}',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 16),
+
+              SizedBox(
+                height: 48,
+                child: gameState.selectedTiles.isNotEmpty
+                    ? Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: switch (gameState.getCurrentWordState()) {
+                            WordState.valid => Colors.green[300],
+                            WordState.alreadyScored => Colors.orange[300],
+                            WordState.invalid => Colors.white,
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                            ),
+                          ],
                         ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+                        child: Text(
+                          gameState.getCurrentWord().toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7D8F69), // Darker shade of green
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      offset: const Offset(0, 4),
-                      blurRadius: 8,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7D8F69), // Darker shade of green
+                    border: Border.all(
+                      color: const Color(0xFFA3D9A5), // Light green border
+                      width: 3,
                     ),
-                  ],
-                ),
-                child: GestureDetector(
-                onPanStart: _handlePanStart,
-                onPanUpdate: _handlePanUpdate,
-                onPanEnd: _handlePanEnd,
-
-                child: GridView.builder(
-                  key: _gridKey,
-                  primary: false,
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(_gridPadding),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: cols,
-                    mainAxisSpacing: _mainAxisSpacing,
-                    crossAxisSpacing: _crossAxisSpacing,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black26,
+                        offset: const Offset(0, 4),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
-                  itemCount: rows * cols,
-                  itemBuilder: (context, index) {
-                    final row = index ~/ cols;
-                    final col = index % cols;
-                    final letter = gameState.board[row][col];
-                    final isSelected = gameState.isTileSelected(TilePos(row, col));
-                    final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
+                  child: GestureDetector(
+                  onPanStart: _handlePanStart,
+                  onPanUpdate: _handlePanUpdate,
+                  onPanEnd: _handlePanEnd,
 
-                    return LetterTile(
-                      letter: letter,
-                      row: row,
-                      col: col,
-                      isSelected: isSelected,
-                      wordState: wordState,
-                      onTapDown: (int row, int col) => _onTileDown(row, col),
-                      onTap: () {
-                        if (!gameState.isGameOver) {
-                          gameState.endSelection();
-                        }
-                      },
-                    );
-                  },
+                  child: GridView.builder(
+                    key: _gridKey,
+                    primary: false,
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(_gridPadding),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: cols,
+                      mainAxisSpacing: _mainAxisSpacing,
+                      crossAxisSpacing: _crossAxisSpacing,
+                    ),
+                    itemCount: rows * cols,
+                    itemBuilder: (context, index) {
+                      final row = index ~/ cols;
+                      final col = index % cols;
+                      final letter = gameState.board[row][col];
+                      final isSelected = gameState.isTileSelected(TilePos(row, col));
+                      final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
+
+                      return LetterTile(
+                        letter: letter,
+                        row: row,
+                        col: col,
+                        isSelected: isSelected,
+                        wordState: wordState,
+                        onTapDown: (int row, int col) => _onTileDown(row, col),
+                        onTap: () {
+                          if (!gameState.isGameOver) {
+                            gameState.endSelection();
+                          }
+                        },
+                      );
+                    },
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

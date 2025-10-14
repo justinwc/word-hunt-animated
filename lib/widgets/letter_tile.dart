@@ -34,13 +34,10 @@ class LetterTile extends StatelessWidget {
 
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected
-              ? switch (wordState) {
-                  WordState.valid => Colors.green[400],
-                  WordState.alreadyScored => Colors.orange[300],
-                  WordState.invalid => Colors.white12,
-                }
-              : Colors.brown[400],
+          image: const DecorationImage(
+            image: AssetImage('lib/assets/tile.png'),
+            fit: BoxFit.cover,
+          ),
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
@@ -50,13 +47,23 @@ class LetterTile extends StatelessWidget {
             ),
           ],
         ),
+        foregroundDecoration: isSelected
+            ? BoxDecoration(
+                color: switch (wordState) {
+                  WordState.valid => Colors.green[400]?.withValues(alpha: 0.8),
+                  WordState.alreadyScored => Colors.orange[300]?.withValues(alpha: 0.8),
+                  WordState.invalid => Colors.white.withValues(alpha: 0.6),
+                },
+                borderRadius: BorderRadius.circular(8),
+              )
+            : null,
         child: Center(
           child: Text(
             letter,
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
         ),

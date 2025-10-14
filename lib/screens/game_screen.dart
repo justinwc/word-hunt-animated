@@ -159,11 +159,38 @@ class _GameScreenState extends State<GameScreen> {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
 
-            Text(
-              gameState.getCurrentWord(),
-              style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+            SizedBox(
+              height: 48,
+              child: gameState.selectedTiles.isNotEmpty
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: switch (gameState.getCurrentWordState()) {
+                          WordState.valid => Colors.green[300],
+                          WordState.alreadyScored => Colors.orange[300],
+                          WordState.invalid => Colors.white,
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        gameState.getCurrentWord().toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
 
             const SizedBox(height: 16),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_hunt/widgets/letter_tile.dart';
 import 'package:word_hunt/providers/game_state.dart';
+import 'package:word_hunt/screens/results_screen.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -12,6 +13,7 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> {
   late GameState gameState;
   final GlobalKey _gridKey = GlobalKey();
+  bool _hasNavigatedToResults = false;
 
   static const double _gridPadding = 20.0;
   static const double _crossAxisSpacing = 10.0;
@@ -36,32 +38,20 @@ class _GameScreenState extends State<GameScreen> {
   void _onGameStateChanged() {
     setState(() {});
     
-    // Show game over dialog when time is up
-    if (gameState.isGameOver) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showGameOverDialog();
+    // Show results screen when time is up (only once)
+    if (gameState.isGameOver && !_hasNavigatedToResults) {
+      _hasNavigatedToResults = true;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => ResultsScreen(
+            gameState: gameState,
+          ),
+        ),
+      ).then((_) {
+        // Reset flag when returning from results screen
+        _hasNavigatedToResults = false;
       });
     }
-  }
-
-  void _showGameOverDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Time\'s Up!'),
-        content: Text('Your final score: ${gameState.score}'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              //gameState.restartGame();
-            },
-            child: const Text('Play Again'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _onTileDown(int row, int col) {
@@ -178,41 +168,57 @@ class _GameScreenState extends State<GameScreen> {
 
             const SizedBox(height: 16),
 
-            GestureDetector(
-              onPanStart: _handlePanStart,
-              onPanUpdate: _handlePanUpdate,
-              onPanEnd: _handlePanEnd,
-
-              child: GridView.builder(
-                key: _gridKey,
-                primary: false,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(_gridPadding),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: cols,
-                  mainAxisSpacing: _mainAxisSpacing,
-                  crossAxisSpacing: _crossAxisSpacing,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7D8F69), // Darker shade of green
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      offset: const Offset(0, 4),
+                      blurRadius: 8,
+                    ),
+                  ],
                 ),
-                itemCount: rows * cols,
-                itemBuilder: (context, index) {
-                  final row = index ~/ cols;
-                  final col = index % cols;
-                  final letter = gameState.board[row][col];
-                  final isSelected = gameState.isTileSelected(TilePos(row, col));
+                child: GestureDetector(
+                onPanStart: _handlePanStart,
+                onPanUpdate: _handlePanUpdate,
+                onPanEnd: _handlePanEnd,
 
-                  return LetterTile(
-                    letter: letter,
-                    row: row,
-                    col: col,
-                    isSelected: isSelected,
-                    onTapDown: (int row, int col) => _onTileDown(row, col),
-                    onTap: () {
-                      if (!gameState.isGameOver) {
-                        gameState.endSelection();
-                      }
-                    },
-                  );
-                },
+                child: GridView.builder(
+                  key: _gridKey,
+                  primary: false,
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(_gridPadding),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: cols,
+                    mainAxisSpacing: _mainAxisSpacing,
+                    crossAxisSpacing: _crossAxisSpacing,
+                  ),
+                  itemCount: rows * cols,
+                  itemBuilder: (context, index) {
+                    final row = index ~/ cols;
+                    final col = index % cols;
+                    final letter = gameState.board[row][col];
+                    final isSelected = gameState.isTileSelected(TilePos(row, col));
+
+                    return LetterTile(
+                      letter: letter,
+                      row: row,
+                      col: col,
+                      isSelected: isSelected,
+                      onTapDown: (int row, int col) => _onTileDown(row, col),
+                      onTap: () {
+                        if (!gameState.isGameOver) {
+                          gameState.endSelection();
+                        }
+                      },
+                    );
+                  },
+                  ),
+                ),
               ),
             ),
           ],

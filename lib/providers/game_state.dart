@@ -121,7 +121,7 @@ class GameState extends ChangeNotifier {
 
   // Timer methods
   void startTimer() {
-    timeRemaining = 10;
+    timeRemaining = 20;
     isGameOver = false;
     _timer?.cancel();
 
@@ -148,6 +148,7 @@ class GameState extends ChangeNotifier {
   // Game restart
   void restartGame() {
     score = 0;
+    scoredWords.clear();
     clearSelection();
     resetBoard();
     startTimer();

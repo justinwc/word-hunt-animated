@@ -17,6 +17,13 @@ class TilePos {
   int get hashCode => row.hashCode ^ col.hashCode;
 }
 
+
+enum WordState {
+  valid,
+  alreadyScored,
+  invalid,
+}
+
 class GameState extends ChangeNotifier {
   // Board configuration
   late List<List<String>> board;
@@ -68,6 +75,25 @@ class GameState extends ChangeNotifier {
 
   String getCurrentWord() {
     return selectedTiles.map((p) => board[p.row][p.col]).join();
+  }
+
+  // Returns the state of the current word: valid, already scored, or invalid
+  WordState getCurrentWordState() {
+    if (selectedTiles.isEmpty) return WordState.invalid;
+    final word = getCurrentWord();
+    
+    if (scoredWords.contains(word)) return WordState.alreadyScored;
+    if (WordListService.isValidWord(word)) return WordState.valid;
+    return WordState.invalid;
+  }
+
+  // Convenience methods for backward compatibility
+  bool isCurrentWordValid() {
+    return getCurrentWordState() == WordState.valid;
+  }
+
+  bool isCurrentWordAlreadyScored() {
+    return getCurrentWordState() == WordState.alreadyScored;
   }
 
   void endSelection() {

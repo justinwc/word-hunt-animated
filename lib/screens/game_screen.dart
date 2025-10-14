@@ -203,12 +203,14 @@ class _GameScreenState extends State<GameScreen> {
                     final col = index % cols;
                     final letter = gameState.board[row][col];
                     final isSelected = gameState.isTileSelected(TilePos(row, col));
+                    final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
 
                     return LetterTile(
                       letter: letter,
                       row: row,
                       col: col,
                       isSelected: isSelected,
+                      wordState: wordState,
                       onTapDown: (int row, int col) => _onTileDown(row, col),
                       onTap: () {
                         if (!gameState.isGameOver) {

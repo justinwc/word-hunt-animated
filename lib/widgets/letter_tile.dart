@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:word_hunt/providers/game_state.dart';
 
 class LetterTile extends StatelessWidget {
   final String letter;
   final bool isSelected;
+  final WordState wordState;
   final int row;
   final int col;
   final void Function(int row, int col)? onTapDown;
@@ -14,6 +16,7 @@ class LetterTile extends StatelessWidget {
     required this.row,
     required this.col,
     this.isSelected = false,
+    this.wordState = WordState.invalid,
     this.onTapDown,
     this.onTap,
   });
@@ -31,7 +34,13 @@ class LetterTile extends StatelessWidget {
 
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? Colors.orange[300] : Colors.brown[400],
+          color: isSelected
+              ? switch (wordState) {
+                  WordState.valid => Colors.green[400],
+                  WordState.alreadyScored => Colors.orange[300],
+                  WordState.invalid => Colors.white12,
+                }
+              : Colors.brown[400],
           borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(

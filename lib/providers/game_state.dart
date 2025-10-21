@@ -147,7 +147,7 @@ class GameState extends ChangeNotifier {
 
   // Timer methods
   void startTimer() {
-    timeRemaining = 20;
+    timeRemaining = 120;
     isGameOver = false;
     _timer?.cancel();
 

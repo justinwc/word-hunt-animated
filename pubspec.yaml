@@ -9,6 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  rive: ^0.13.0
 
 dev_dependencies:
   flutter_test:
@@ -21,3 +22,4 @@ flutter:
     - lib/assets/enable1.txt
     - lib/assets/background.png
     - lib/assets/tile.png
+    - lib/assets/bunny.riv

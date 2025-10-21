@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:word_hunt/widgets/letter_tile.dart';
 import 'package:word_hunt/providers/game_state.dart';
 import 'package:word_hunt/screens/results_screen.dart';
+import 'package:rive/rive.dart' as rive;
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -18,6 +19,12 @@ class _GameScreenState extends State<GameScreen> {
   static const double _gridPadding = 20.0;
   static const double _crossAxisSpacing = 10.0;
   static const double _mainAxisSpacing = 10.0;
+
+  // RiveAnimation.asset(
+  //   'assets/bunny.riv',
+  //   fit: BoxFit.contain,
+  //   animations: ['Idle'],
+  // )
 
   @override
   void initState() {
@@ -171,29 +178,32 @@ class _GameScreenState extends State<GameScreen> {
               SizedBox(
                 height: 48,
                 child: gameState.selectedTiles.isNotEmpty
-                    ? Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: switch (gameState.getCurrentWordState()) {
-                            WordState.valid => Colors.green[300],
-                            WordState.alreadyScored => Colors.orange[300],
-                            WordState.invalid => Colors.white,
-                          },
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              offset: const Offset(0, 2),
-                              blurRadius: 4,
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 80.0), // Move to the right
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: switch (gameState.getCurrentWordState()) {
+                              WordState.valid => Colors.green[300],
+                              WordState.alreadyScored => Colors.orange[300],
+                              WordState.invalid => Colors.white,
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                offset: const Offset(0, 2),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            gameState.getCurrentWord().toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
-                          ],
-                        ),
-                        child: Text(
-                          gameState.getCurrentWord().toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
                           ),
                         ),
                       )
@@ -202,64 +212,85 @@ class _GameScreenState extends State<GameScreen> {
 
               const SizedBox(height: 16),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7D8F69), // Darker shade of green
-                    border: Border.all(
-                      color: const Color(0xFFA3D9A5), // Light green border
-                      width: 3,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        offset: const Offset(0, 4),
-                        blurRadius: 8,
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.topCenter,
+                children: [
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF7D8F69), // Darker shade of green
+                        border: Border.all(
+                          color: const Color(0xFFA3D9A5), // Light green border
+                          width: 3,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: const Offset(0, 4),
+                            blurRadius: 8,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: GestureDetector(
-                  onPanStart: _handlePanStart,
-                  onPanUpdate: _handlePanUpdate,
-                  onPanEnd: _handlePanEnd,
+                      child: GestureDetector(
+                      onPanStart: _handlePanStart,
+                      onPanUpdate: _handlePanUpdate,
+                      onPanEnd: _handlePanEnd,
 
-                  child: GridView.builder(
-                    key: _gridKey,
-                    primary: false,
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(_gridPadding),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: cols,
-                      mainAxisSpacing: _mainAxisSpacing,
-                      crossAxisSpacing: _crossAxisSpacing,
-                    ),
-                    itemCount: rows * cols,
-                    itemBuilder: (context, index) {
-                      final row = index ~/ cols;
-                      final col = index % cols;
-                      final letter = gameState.board[row][col];
-                      final isSelected = gameState.isTileSelected(TilePos(row, col));
-                      final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
+                      child: GridView.builder(
+                        key: _gridKey,
+                        primary: false,
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.all(_gridPadding),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: cols,
+                          mainAxisSpacing: _mainAxisSpacing,
+                          crossAxisSpacing: _crossAxisSpacing,
+                        ),
+                        itemCount: rows * cols,
+                        itemBuilder: (context, index) {
+                          final row = index ~/ cols;
+                          final col = index % cols;
+                          final letter = gameState.board[row][col];
+                          final isSelected = gameState.isTileSelected(TilePos(row, col));
+                          final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
 
-                      return LetterTile(
-                        letter: letter,
-                        row: row,
-                        col: col,
-                        isSelected: isSelected,
-                        wordState: wordState,
-                        onTapDown: (int row, int col) => _onTileDown(row, col),
-                        onTap: () {
-                          if (!gameState.isGameOver) {
-                            gameState.endSelection();
-                          }
+                          return LetterTile(
+                            letter: letter,
+                            row: row,
+                            col: col,
+                            isSelected: isSelected,
+                            wordState: wordState,
+                            onTapDown: (int row, int col) => _onTileDown(row, col),
+                            onTap: () {
+                              if (!gameState.isGameOver) {
+                                gameState.endSelection();
+                              }
+                            },
+                          );
                         },
-                      );
-                    },
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  
+                  // Bunny positioned directly on top of the game board
+                  Positioned(
+                    top: -167,
+                    right: 180,
+                    child: SizedBox(
+                      width: 200,
+                      height: 200,
+                      child: rive.RiveAnimation.asset(
+                        'lib/assets/bunny.riv',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

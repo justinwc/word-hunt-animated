@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:word_hunt/widgets/letter_tile.dart';
 import 'package:word_hunt/providers/game_state.dart';
 import 'package:word_hunt/screens/results_screen.dart';
@@ -16,21 +17,21 @@ class _GameScreenState extends State<GameScreen> {
   final GlobalKey _gridKey = GlobalKey();
   bool _hasNavigatedToResults = false;
 
+  // Rive controller & trigger for bunny animation
+  rive.StateMachineController? _riveController;
+  rive.SMITrigger? _loginSuccess;
+
   static const double _gridPadding = 20.0;
   static const double _crossAxisSpacing = 10.0;
   static const double _mainAxisSpacing = 10.0;
-
-  // RiveAnimation.asset(
-  //   'assets/bunny.riv',
-  //   fit: BoxFit.contain,
-  //   animations: ['Idle'],
-  // )
 
   @override
   void initState() {
     super.initState();
     gameState = GameState();
     gameState.addListener(_onGameStateChanged);
+    // Trigger bunny animation when a valid word is scored
+    gameState.onValidWordScored = _triggerBunnySuccess;
     gameState.startTimer();
   }
 
@@ -38,8 +39,25 @@ class _GameScreenState extends State<GameScreen> {
   void dispose() {
     gameState.stopTimer();
     gameState.removeListener(_onGameStateChanged);
+    gameState.onValidWordScored = null;
     gameState.dispose();
     super.dispose();
+  }
+
+  void _onRiveInit(rive.Artboard artboard) {
+    final controller = rive.StateMachineController.fromArtboard(
+      artboard,
+      'State Machine 1',
+    );
+    if (controller != null) {
+      _riveController = controller;
+      artboard.addController(controller);
+      _loginSuccess = controller.findSMI('login_success') as rive.SMITrigger?;
+    }
+  }
+
+  void _triggerBunnySuccess() {
+    _loginSuccess?.fire();
   }
 
   void _onGameStateChanged() {
@@ -277,7 +295,6 @@ class _GameScreenState extends State<GameScreen> {
                     ),
                   ),
                   
-                  // Bunny positioned directly on top of the game board
                   Positioned(
                     top: -167,
                     right: 180,
@@ -287,6 +304,7 @@ class _GameScreenState extends State<GameScreen> {
                       child: rive.RiveAnimation.asset(
                         'lib/assets/bunny.riv',
                         fit: BoxFit.contain,
+                        onInit: _onRiveInit,
                       ),
                     ),
                   ),

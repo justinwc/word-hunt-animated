@@ -41,6 +41,9 @@ class GameState extends ChangeNotifier {
   bool isGameOver = false;
   Timer? _timer;
 
+  // UI callbacks (set by UI layer)
+  VoidCallback? onValidWordScored;
+
   GameState() {
     _initializeBoard();
   }
@@ -107,6 +110,7 @@ class GameState extends ChangeNotifier {
         debugPrint('Valid word: $word');
         scoredWords.add(word);
         _addScore(word);
+        onValidWordScored?.call(); //bunny animation
       } else {
         debugPrint('Invalid word: $word');
       }

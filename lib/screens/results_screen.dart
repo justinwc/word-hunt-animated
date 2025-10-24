@@ -86,79 +86,42 @@ class _ResultsScreenState extends State<ResultsScreen> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Words list
-                      Flexible(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            // Calculate how many items can fit
-                            const itemHeight = 48.0;
-                            final maxItems = (constraints.maxHeight / itemHeight).floor();
-                            final displayCount = sortedWords.length > maxItems 
-                                ? maxItems - 1 
-                                : sortedWords.length;
-                            final hasMore = sortedWords.length > displayCount;
-                            
-                            return ListView.builder(
-                              padding: const EdgeInsets.only(top: 8),
-                              shrinkWrap: true,
-                              itemCount: displayCount + (hasMore ? 1 : 0),
-                              itemBuilder: (context, index) {
-                                if (hasMore && index == displayCount) {
-                                  // Show "..." indicator
-                                  return Container(
-                                    height: itemHeight,
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      '...',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  );
-                                }
-                                
-                                final word = sortedWords[index];
-                                final points = _calculateWordPoints(word);
-                                
-                                return Container(
-                                  height: itemHeight,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        word.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        '$points',
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.amber,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(top: 8),
+                    itemCount: sortedWords.length,
+                    itemBuilder: (context, index) {
+                      final word = sortedWords[index];
+                      final points = _calculateWordPoints(word);
+                      
+                      return Container(
+                        height: 48,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                      ),
-                    ],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              word.toUpperCase(),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              '$points',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.amber,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
                 

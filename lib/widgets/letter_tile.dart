@@ -61,7 +61,7 @@ class LetterTile extends StatelessWidget {
           child: Text(
             letter,
             style: TextStyle(
-              fontSize: 24,
+              fontSize: 33,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),

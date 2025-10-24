@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:word_hunt/widgets/letter_tile.dart';
 import 'package:word_hunt/providers/game_state.dart';
 import 'package:word_hunt/screens/results_screen.dart';
@@ -18,6 +17,7 @@ class _GameScreenState extends State<GameScreen> {
   bool _hasNavigatedToResults = false;
 
   // Rive controller & trigger for bunny animation
+  // ignore: unused_field
   rive.StateMachineController? _riveController;
   rive.SMITrigger? _loginSuccess;
 
@@ -164,154 +164,176 @@ class _GameScreenState extends State<GameScreen> {
             scale: 0.8,
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                'Word Hunt',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
+        child: Column(
+          children: [
+            // White box at the top
+            Padding(
+              padding: const EdgeInsets.only(top: 80.0, left: 20.0, right: 20.0),
+              child: Container(
+                padding: const EdgeInsets.all(18.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 4)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Time Left: ${gameState.formattedTime}',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    //const SizedBox(height: 8),
 
-              const SizedBox(height: 24),
+                    Text(
+                      'Words: ${gameState.scoredWords.length}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
 
-              Text(
-                'Time Left: ${gameState.formattedTime}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+                    //const SizedBox(height: 8),
+
+                    Text(
+                      'Score: ${gameState.score}',
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 110),
 
-              Text(
-                'Score: ${gameState.score}',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
 
-              const SizedBox(height: 16),
+                  SizedBox(
+                    height: 48,
+                    child: gameState.selectedTiles.isNotEmpty
+                        ? Padding(
+                            padding: const EdgeInsets.only(left: 80.0), // Move to the right
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: switch (gameState.getCurrentWordState()) {
+                                  WordState.valid => Colors.green[300],
+                                  WordState.alreadyScored => Colors.orange[300],
+                                  WordState.invalid => Colors.white,
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    offset: const Offset(0, 2),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Text(
+                                gameState.getCurrentWord().toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
 
-              SizedBox(
-                height: 48,
-                child: gameState.selectedTiles.isNotEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 80.0), // Move to the right
+                  const SizedBox(height: 16),
+
+                  Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.topCenter,
+                    children: [
+
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                           decoration: BoxDecoration(
-                            color: switch (gameState.getCurrentWordState()) {
-                              WordState.valid => Colors.green[300],
-                              WordState.alreadyScored => Colors.orange[300],
-                              WordState.invalid => Colors.white,
-                            },
-                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFF7D8F69), // Darker shade of green
+                            border: Border.all(
+                              color: const Color(0xFFA3D9A5), // Light green border
+                              width: 3,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black26,
-                                offset: const Offset(0, 2),
-                                blurRadius: 4,
+                                offset: const Offset(0, 4),
+                                blurRadius: 8,
                               ),
                             ],
                           ),
-                          child: Text(
-                            gameState.getCurrentWord().toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                          child: GestureDetector(
+                          onPanStart: _handlePanStart,
+                          onPanUpdate: _handlePanUpdate,
+                          onPanEnd: _handlePanEnd,
+
+                          child: GridView.builder(
+                            key: _gridKey,
+                            primary: false,
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(_gridPadding),
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: cols,
+                              mainAxisSpacing: _mainAxisSpacing,
+                              crossAxisSpacing: _crossAxisSpacing,
+                            ),
+                            itemCount: rows * cols,
+                            itemBuilder: (context, index) {
+                              final row = index ~/ cols;
+                              final col = index % cols;
+                              final letter = gameState.board[row][col];
+                              final isSelected = gameState.isTileSelected(TilePos(row, col));
+                              final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
+
+                              return LetterTile(
+                                letter: letter,
+                                row: row,
+                                col: col,
+                                isSelected: isSelected,
+                                wordState: wordState,
+                                onTapDown: (int row, int col) => _onTileDown(row, col),
+                                onTap: () {
+                                  if (!gameState.isGameOver) {
+                                    gameState.endSelection();
+                                  }
+                                },
+                              );
+                            },
                             ),
                           ),
                         ),
-                      )
-                    : const SizedBox.shrink(),
-              ),
-
-              const SizedBox(height: 16),
-
-              Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.topCenter,
-                children: [
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7D8F69), // Darker shade of green
-                        border: Border.all(
-                          color: const Color(0xFFA3D9A5), // Light green border
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: const Offset(0, 4),
-                            blurRadius: 8,
+                      ),
+                      
+                      Positioned(
+                        top: -167,
+                        right: 180,
+                        child: SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: rive.RiveAnimation.asset(
+                            'lib/assets/bunny.riv',
+                            fit: BoxFit.contain,
+                            onInit: _onRiveInit,
                           ),
-                        ],
-                      ),
-                      child: GestureDetector(
-                      onPanStart: _handlePanStart,
-                      onPanUpdate: _handlePanUpdate,
-                      onPanEnd: _handlePanEnd,
-
-                      child: GridView.builder(
-                        key: _gridKey,
-                        primary: false,
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.all(_gridPadding),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: cols,
-                          mainAxisSpacing: _mainAxisSpacing,
-                          crossAxisSpacing: _crossAxisSpacing,
-                        ),
-                        itemCount: rows * cols,
-                        itemBuilder: (context, index) {
-                          final row = index ~/ cols;
-                          final col = index % cols;
-                          final letter = gameState.board[row][col];
-                          final isSelected = gameState.isTileSelected(TilePos(row, col));
-                          final wordState = isSelected ? gameState.getCurrentWordState() : WordState.invalid;
-
-                          return LetterTile(
-                            letter: letter,
-                            row: row,
-                            col: col,
-                            isSelected: isSelected,
-                            wordState: wordState,
-                            onTapDown: (int row, int col) => _onTileDown(row, col),
-                            onTap: () {
-                              if (!gameState.isGameOver) {
-                                gameState.endSelection();
-                              }
-                            },
-                          );
-                        },
                         ),
                       ),
-                    ),
-                  ),
-                  
-                  Positioned(
-                    top: -167,
-                    right: 180,
-                    child: SizedBox(
-                      width: 200,
-                      height: 200,
-                      child: rive.RiveAnimation.asset(
-                        'lib/assets/bunny.riv',
-                        fit: BoxFit.contain,
-                        onInit: _onRiveInit,
-                      ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

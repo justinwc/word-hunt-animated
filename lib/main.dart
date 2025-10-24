@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:word_hunt/screens/intro_screen.dart';
 import 'package:word_hunt/screens/game_screen.dart';
 import 'package:word_hunt/services/word_list_service.dart';
 
@@ -20,7 +21,7 @@ class MainApp extends StatelessWidget {
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
-      home: GameScreen(),
+      home: IntroScreen(),  //GameScreen(),
     );
   }
 }

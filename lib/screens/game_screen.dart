@@ -166,43 +166,57 @@ class _GameScreenState extends State<GameScreen> {
         ),
         child: Column(
           children: [
-            // White box at the top
+            // White box at the top with timer sliver
             Padding(
-              padding: const EdgeInsets.only(top: 80.0, left: 20.0, right: 20.0),
-              child: Container(
-                padding: const EdgeInsets.all(18.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 4)),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Time Left: ${gameState.formattedTime}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+              padding: const EdgeInsets.only(top: 60.0, left: 20.0, right: 20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // White box with score and words
+                  Container(
+                    padding: const EdgeInsets.all(18.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 4)),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Words: ${gameState.scoredWords.length}',
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+
+                        Text(
+                          'Score: ${gameState.score.toString().padLeft(4, '0')}',
+                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.only(left: 135.0, top: 2.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        gameState.formattedTime,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                    //const SizedBox(height: 8),
-
-                    Text(
-                      'Words: ${gameState.scoredWords.length}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    ),
-
-                    //const SizedBox(height: 8),
-
-                    Text(
-                      'Score: ${gameState.score}',
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 

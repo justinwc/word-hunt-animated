@@ -10,7 +10,7 @@ A mobile game inspired by Game Pigeon's Word Hunt on iMessage. I'm terrible at t
 
 ## Demo
 
-[Watch the Demo]([https://youtube.com/shorts/qWQxFlzOtSc?feature=share](https://youtube.com/shorts/dbrRNo3c3sw?feature=share))
+[Watch the Demo](https://youtube.com/shorts/dbrRNo3c3sw?feature=share)
 
 ## Getting Started
 

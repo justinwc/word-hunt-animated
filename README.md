@@ -4,7 +4,7 @@
   <img width="282" height="681" alt="Word Hunt Screenshot" src="https://github.com/user-attachments/assets/0e65e2b5-6053-4a46-8fc5-45efc8a4adfb" />
 </p>
 
-A mobile game inspired by Game Pigeon's Word Hunt on iMessage. I'm terrible at this game, so I wanted a cute mascot cheering me on so I didn't feel as bad about my score. Built with Flutter and smooth animations done with Rive.
+A mobile game inspired by Game Pigeon's Word Hunt on iMessage. Since I'm terrible at this game, I wanted a cute mascot cheering me on so I didn't feel as bad about my score. Built with Flutter and smooth animations done with Rive.
 
 
 
